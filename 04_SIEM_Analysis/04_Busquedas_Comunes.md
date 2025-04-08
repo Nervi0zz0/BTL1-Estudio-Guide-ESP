@@ -1,0 +1,23 @@
+# Búsquedas Comunes en SIEM (Splunk) - Formato Tabla
+
+Esta tabla muestra ejemplos de consultas SPL (Search Processing Language) para escenarios comunes de análisis de seguridad en Splunk.
+
+**Importante:** Recuerda **adaptar siempre** estas consultas a tu entorno específico:
+* Ajusta los nombres de **índice (`index=`)** y **tipo de fuente (`sourcetype=`)**.
+* Verifica y adapta los **nombres de los campos** (ej., `user`, `src_ip`, `EventCode`, `dest_domain`, `NewProcessName`).
+* Reemplaza los **valores placeholder** (ej. `<usuario>`, `<IP_maliciosa>`) con los datos reales.
+* Selecciona el **rango de tiempo** adecuado en la interfaz de Splunk.
+
+| Objetivo                                                     | Consulta SPL de Ejemplo                                                                                                                                                              | Notas / Explicación Breve                                                                                                |
+| :----------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| **1. Logins Fallidos Múltiples** (Fuerza Bruta/Adivinación)   | ```splunk-query index="wineventlog" sourcetype="WinEventLog:Security" EventCode=4625 \| stats count BY user, src_ip \| sort -count \| head 20 ```                                       | Busca EventCode 4625 (Win). Agrupa por usuario/IP origen. Muestra los 20 con más intentos fallidos.                        |
+| **2. Logins Exitosos Sospechosos** (Usuario/IP Específico)  | ```splunk-query index="wineventlog" sourcetype="WinEventLog:Security" EventCode=4624 user="<usuario_comprometido>" \| table _time, user, src_ip, LogonTypeName \| sort -_time ```         | Busca EventCode 4624 (Win) para un `<usuario>`. Muestra hora, IP origen, tipo de login. Ordenado por más reciente.           |
+| **3. Ejecución de Procesos Sospechosos** (Requiere Logs 4688/Sysmon 1) | ```splunk-query index="wineventlog" sourcetype="WinEventLog:Security" EventCode=4688 (NewProcessName="*\\powershell.exe" OR NewProcessName="*\\cmd.exe") \| table _time, CreatorProcessName, NewProcessName, CommandLine ``` | Busca EventCode 4688 (Win). Filtra por nombres de proceso (ej. PowerShell, cmd). Muestra proceso padre, proceso hijo y línea de comandos. |
+| **4. Conexiones a Indicadores Maliciosos** (IP/Dominio)     | ```splunk-query (index="firewall" OR index="proxy") (dest_ip="<IP_maliciosa>" OR dest_domain="<dominio_malicioso>") \| stats count BY src_ip, dest_ip, dest_port, action \| sort -count ``` | Busca en logs de FW/Proxy conexiones a una IP/Dominio malo conocido (reemplazar). Agrupa por IP origen, destino, puerto y acción. |
+| **5. Descarga de Archivos Sospechosos** | ```splunk-query index="proxy" sourcetype="proxy_logs" (file_extension="exe" OR url="*.ps1") \| stats count BY user, src_ip, url \| sort -count ```                                      | Busca en logs de proxy (adaptar campos) descargas de extensiones/URLs sospechosas. Agrupa por usuario, IP origen y URL.      |
+| **6. Investigar Actividad de un Usuario Específico** | ```splunk-query index=* (user="<usuario_comprometido>" OR TargetUserName="<usuario_comprometido>") \| stats count BY sourcetype, host, EventCode, action \| sort -count ```             | Busca eventos relacionados con `<usuario>` en todos los índices. Agrupa por tipo de log, host, EventCode, acción para resumen. |
+| **7. Búsqueda General de un IoC** (IP, Dominio, Hash, Archivo) | ```splunk-query index=* "<IoC_A_BUSCAR>" \| table _time, index, sourcetype, host, _raw \| sort -_time ```                                                                               | Busca una cadena `<IoC>` exacta en todos los índices. Muestra info de contexto y el evento crudo (`_raw`).                    |
+| **8. Detección de Cambios Sospechosos** (Ej: Nuevo Servicio)  | ```splunk-query index="wineventlog" sourcetype="WinEventLog:System" EventCode=7045 \| table _time, host, ServiceName, ServiceFileName, ServiceType, StartType \| sort -_time ```        | Busca EventCode 7045 (Win System Log - Servicio instalado). Muestra detalles del nuevo servicio.                         |
+
+---
+*Estos ejemplos son puntos de partida. A menudo necesitarás combinar, refinar y adaptar estas búsquedas según la investigación específica y los datos disponibles.*
