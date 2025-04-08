@@ -4,7 +4,7 @@ Más allá de analizar paquetes o protocolos individuales, reconocer **patrones*
 
 Estos patrones a menudo se corresponden con diferentes fases de un ciberataque (C2, movimiento lateral, exfiltración, etc.).
 
-## 📡 Comando y Control (C2 / C&C)
+## Comando y Control (C2 / C&C)
 
 Una vez que un sistema está comprometido, el malware necesita comunicarse con el atacante para recibir órdenes y/o enviar datos. Este tráfico C2 a menudo sigue patrones característicos:
 
@@ -18,7 +18,7 @@ Una vez que un sistema está comprometido, el malware necesita comunicarse con e
     * **Descripción:** Uso de consultas/respuestas DNS para enviar y recibir comandos/datos. Incluye DGA y DNS Tunneling.
     * **Qué Buscar:** (Ver sección DNS) Alto volumen de NXDomain, dominios aleatorios/largos, uso intensivo de registros TXT o subdominios largos.
 
-##  quét Escaneo de Red (`Scanning`)
+## Escaneo de Red (Scanning)
 
 Los atacantes (o malware como worms) escanean redes para encontrar otros sistemas vulnerables.
 
@@ -29,7 +29,7 @@ Los atacantes (o malware como worms) escanean redes para encontrar otros sistema
     * **Descripción:** Un host intenta conectarse a **muchos puertos diferentes** en un **único host destino**.
     * **Qué Buscar:** Desde una única IP origen, un gran número de intentos de conexión a una *única IP destino*, pero con *diferentes puertos destino*.
 
-## ↔️ Movimiento Lateral
+## Movimiento Lateral
 
 Una vez dentro, los atacantes intentan moverse a otros sistemas en la red interna.
 
@@ -40,7 +40,7 @@ Una vez dentro, los atacantes intentan moverse a otros sistemas en la red intern
     * Tráfico asociado a herramientas de ejecución remota como **PsExec**, WinRM, WMI. (PsExec a menudo usa SMB y crea/inicia un servicio llamado `PSEXESVC` en el destino).
     * Intentos de autenticación fallidos seguidos de éxito entre máquinas internas.
 
-## 📤 Exfiltración de Datos
+## Exfiltración de Datos
 
 El objetivo final suele ser robar información sensible.
 
@@ -50,13 +50,13 @@ El objetivo final suele ser robar información sensible.
     * **Transferencias a Servicios Cloud/Públicos:** Subidas masivas a servicios de almacenamiento cloud (Mega, Dropbox, etc.) o pastebins si no es una actividad normal.
     * **Compresión/Cifrado:** El tráfico de exfiltración suele estar comprimido (`.zip`, `.rar`) y/o cifrado. Busca conexiones TLS a destinos sospechosos con grandes transferencias de datos.
 
-## 🦠 Descarga de Malware / Componentes Adicionales
+## Descarga de Malware / Componentes Adicionales
 
 * **Qué Buscar:**
     * Conexiones HTTP/FTP/etc. que descargan archivos ejecutables, DLLs, scripts, o archivos comprimidos sospechosos desde URLs/IPs conocidas por alojar malware (CTI).
     * Patrón de "Staged Payload": El malware inicial (dropper) descarga componentes adicionales desde diferentes ubicaciones después de la infección inicial.
 
-## 🌊 Denegación de Servicio (DoS/DDoS) - Menos Común en Análisis Forense Post-Mortem
+## Denegación de Servicio (DoS/DDoS) - Menos Común en Análisis Forense Post-Mortem
 
 * **Descripción:** Inundar un objetivo con tráfico para agotar sus recursos.
 * **Qué Buscar:** Volumen masivo de paquetes (SYN, UDP, ICMP) desde una o muchas fuentes hacia un único destino. A menudo con IPs origen falsificadas (spoofed).
